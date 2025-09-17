@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dapiato pro salud - Sistema de Tickets</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+/* Estilos generales y variables */
+:root {
+    --color-principal: #fc3939; /* Verde principal */
+    --color-secundario: #e42525; /* Verde oscuro */
+    --color-terciario: #1764e0; /* Azul */
+    --color-fondo: #f0f4f7; /* Blanco grisáceo */
+    --color-texto: #333;
+    --color-tarjeta: #fff;
+    --color-prioridad: #e84c3d; /* Rojo para prioridad */
+    --sombra-tarjeta: 0 4px 8px rgba(95, 95, 95, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: 250px; /* Espacio para el header fijo */
+}
+
+/* Header fijo */
+header {
+    position: fixed;
+    top:0;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-principal);
+    color: white;
+    text-align: center;
+    padding: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.logo-container {
+    margin-bottom: 1rem;
+}
+
+.logo-container img {
+    width: 100px;
+    height: auto;
+}
+
+header h1 {
+    color: white;
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+/* Contenedor principal del main, ahora con Flexbox */
+.container {
+    background-color: var(--color-tarjeta);
+    border-radius: 12px;
+    box-shadow: var(--sombra-tarjeta);
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 2rem; /* Espacio entre el header y el contenido principal */
+}
+
+/* Panel de control */
+#panel-control {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+#panel-control button {
+    background-color: var(--color-secundario);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+#panel-control button.active {
+    background-color: var(--color-principal);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#panel-control button:hover {
+    background-color: var(--color-principal);
+}
+
+/* Secciones de contenido */
+#secciones-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.seccion-contenido {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: 8px;
+    background-color: var(--color-fondo);
+    border: 1px solid #ddd;
+}
+
+.seccion-contenido:not(.active) {
+    display: none;
+}
+
+#registro form,
+#espera ul,
+#atendidos ul {
+    width: 100%;
+    max-width: 500px;
+}
+
+h2 {
+    font-size: 1.8rem;
+    color: var(--color-principal);
+    border-bottom: 2px solid var(--color-principal);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+/* Formulario de registro */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+input, select {
+    padding: 0.8rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--color-principal);
+}
+
+.form-btn {
+    background-color: var(--color-principal);
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-btn:hover {
+    background-color: var(--color-secundario);
+}
+
+/* Listas de pacientes */
+ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.paciente-card {
+    background-color: var(--color-tarjeta);
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 5px solid var(--color-principal);
+    gap: 1.5rem;
+}
+
+.paciente-prioridad {
+    border-left: 5px solid var(--color-prioridad);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+.paciente-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.paciente-nombre {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-secundario);
+    margin-bottom: 0.5rem;
+}
+
+.paciente-ticket {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-principal);
+    background-color: var(--color-fondo);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+}
+
+.paciente-accion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.atendido-btn {
+    background-color: var(--color-terciario);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.atendido-btn:hover {
+    background-color: #3673c2;
+}
+
+.atendido-card .paciente-ticket {
+    color: #777;
+}
+
+.atendido-card .paciente-nombre {
+    color: #4d4d4d;
+}
+
+.atendido-card .paciente-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.atendido-card .paciente-info > div {
+    font-size: 0.9em;
+}
+
+.vacio {
+    text-align: center;
+    color: #888;
+}
+</style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <img src="abstract-logo-design-for-any-corporate-brand-business-company-vector.jpg" alt="Logo de Dapiato pro salud">
+        </div>
+        <h1>Francis Company</h1>
+        <p>Sistema de Gestión de Tickets de Pacientes</p>
+    </header>
+    <main class="container">
+        <div id="panel-control">
+            <button id="btn-registro" class="active">Registro</button>
+            <button id="btn-espera">En espera</button>
+            <button id="btn-atendidos">Atendidos</button>
+        </div>
+
+        <div id="secciones-container">
+            <section id="registro" class="seccion-contenido active">
+                <h2>Registro de Paciente</h2>
+                <form id="registro-form">
+                    <div class="form-group">
+                        <label for="nombre">Nombre Completo</label>
+                        <input type="text" id="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="doctor">Doctor/a a cargo</label>
+                        <input type="text" id="doctor" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="caso-especial">Prioridad (Marque si aplica)</label>
+                        <select id="caso-especial">
+                            <option value="no">No</option>
+                            <option value="embarazada">Embarazada</option>
+                            <option value="anciano">Anciano/a</option>
+                            <option value="nino">Niño/a</option>
+                            <option value="discapacitado">Discapacitado/a</option>
+                            <option value="accidente">Accidente</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="form-btn">Registrar Paciente</button>
+                </form>
+            </section>
+            
+            <section id="espera" class="seccion-contenido">
+                <h2>Pacientes en Espera</h2>
+                <ul id="lista-espera">
+                    <p class="vacio">No hay pacientes en espera</p>
+                </ul>
+            </section>
+            
+            <section id="atendidos" class="seccion-contenido">
+                <h2>Pacientes Atendidos</h2>
+                <ul id="lista-atendidos">
+                    <p class="vacio">No hay pacientes atendidos</p>
+                </ul>
+            </section>
+        </div>
+    </main>
+
+    <script type="module">
+        const $ = selector => document.querySelector(selector);
+        const $$ = selector => document.querySelectorAll(selector);
+
+        // --- Simulación de la base de datos JSON con localStorage ---
+        const DB_KEY = 'pacientesDB';
+
+        const getDB = () => {
+            const data = localStorage.getItem(DB_KEY);
+            return data ? JSON.parse(data) : [];
+        };
+
+        const saveDB = (db) => {
+            localStorage.setItem(DB_KEY, JSON.stringify(db));
+        };
+
+        // --- Estructura de datos: Cola (Queue) para la gestión ---
+        const crearCola = () => {
+            const cola = [];
+            return {
+                encolar: item => {
+                    cola.push(item);
+                },
+                obtenerCola: () => cola,
+                reorganizar: () => {
+                    const pacientesPrioridad = cola.filter(p => esCasoEspecial(p.casoEspecial));
+                    const pacientesNormales = cola.filter(p => !esCasoEspecial(p.casoEspecial));
+                    cola.splice(0, cola.length, ...pacientesPrioridad, ...pacientesNormales);
+                }
+            };
+        };
+
+        let colaPacientes = crearCola();
+        let pacientesAtendidos = [];
+        let idCounter = 1;
+
+        const form = $('#registro-form');
+        const listaEspera = $('#lista-espera');
+        const listaAtendidos = $('#lista-atendidos');
+        const panelControl = $('#panel-control');
+        const secciones = $$('.seccion-contenido');
+        const botonesPanel = $$('#panel-control button');
+
+        // Funciones de utilidad y renderizado
+        const generarId = () => {
+            const db = getDB();
+            let lastId = 0;
+            if (db.length > 0) {
+                const lastTicket = db.reduce((max, p) => p.id > max ? p.id : max, "TICKET-0000");
+                lastId = parseInt(lastTicket.split('-')[1]);
+            }
+            idCounter = lastId + 1;
+            return `TICKET-${String(idCounter).padStart(4, '0')}`;
+        };
+
+        const esCasoEspecial = tipo => ['embarazada', 'anciano', 'nino', 'discapacitado', 'accidente'].includes(tipo);
+
+        const mostrarSeccion = (idSeccion) => {
+            secciones.forEach(seccion => {
+                seccion.classList.remove('active');
+            });
+            $(`#${idSeccion}`).classList.add('active');
+        };
+
+        const actualizarBotonesPanel = (btnActivo) => {
+            botonesPanel.forEach(btn => btn.classList.remove('active'));
+            btnActivo.classList.add('active');
+        };
+
+        const crearTarjetaPaciente = (paciente, esAtendido = false) => {
+            const li = document.createElement('li');
+            li.dataset.id = paciente.id;
+            li.classList.add('paciente-card');
+
+            if (esCasoEspecial(paciente.casoEspecial) && !esAtendido) {
+                li.classList.add('paciente-prioridad');
+            }
+
+            li.innerHTML = `
+                <div class="paciente-info">
+                    <div class="paciente-nombre">${paciente.nombre}</div>
+                    <div>Doctor/a: ${paciente.doctor}</div>
+                    <div>Fecha de Registro: ${paciente.fechaRegistro}</div>
+                    ${esAtendido ? `<div>Fecha de Atención: ${paciente.fechaAtencion}</div>` : ''}
+                </div>
+                <div class="paciente-accion">
+                    <div class="paciente-ticket">${paciente.id}</div>
+                </div>
+            `;
+            return li;
+        };
+
+        const renderPacientes = (lista, elementos, esAtendido = false) => {
+            if (elementos.length === 0) {
+                lista.innerHTML = `<p class="vacio">No hay pacientes ${esAtendido ? 'atendidos' : 'en espera'}</p>`;
+                return;
+            }
+
+            lista.innerHTML = '';
+            elementos.forEach(paciente => {
+                const tarjeta = crearTarjetaPaciente(paciente, esAtendido);
+                
+                if (!esAtendido) {
+                    const contenedorAccion = tarjeta.querySelector('.paciente-accion');
+                    const botonAtendido = document.createElement('button');
+                    botonAtendido.textContent = 'Atender';
+                    botonAtendido.classList.add('atendido-btn');
+                    botonAtendido.onclick = () => atenderPaciente(paciente.id);
+                    contenedorAccion.appendChild(botonAtendido);
+                } else {
+                    tarjeta.classList.add('atendido-card');
+                    tarjeta.querySelector('.paciente-accion').remove();
+                    tarjeta.style.borderLeftColor = '#ccc';
+                }
+                
+                lista.appendChild(tarjeta);
+            });
+        };
+
+        const actualizarListas = () => {
+            renderPacientes(listaEspera, colaPacientes.obtenerCola());
+            renderPacientes(listaAtendidos, pacientesAtendidos, true);
+        };
+
+        // Lógica de la aplicación
+        const registrarPaciente = (evento) => {
+            evento.preventDefault();
+
+            const nuevoPaciente = {
+                id: generarId(),
+                nombre: $('#nombre').value,
+                doctor: $('#doctor').value,
+                casoEspecial: $('#caso-especial').value,
+                fechaRegistro: new Date().toLocaleString(),
+                fechaAtencion: null
+            };
+
+            // Guarda el paciente en la DB
+            const db = getDB();
+            db.push(nuevoPaciente);
+            saveDB(db);
+
+            // Reorganiza y actualiza las listas en pantalla
+            cargarDatosDesdeDB();
+            actualizarListas();
+            form.reset();
+            mostrarSeccion('espera');
+            actualizarBotonesPanel($('#btn-espera'));
+        };
+
+        const atenderPaciente = (id) => {
+            const db = getDB();
+            const pacienteIndex = db.findIndex(p => p.id === id);
+
+            if (pacienteIndex !== -1) {
+                // Actualiza la fecha de atención y mueve el paciente a la lista de atendidos
+                db[pacienteIndex].fechaAtencion = new Date().toLocaleString();
+                saveDB(db);
+
+                // Recarga los datos para reflejar el cambio
+                cargarDatosDesdeDB();
+                actualizarListas();
+            }
+        };
+
+        const cargarDatosDesdeDB = () => {
+            const db = getDB();
+            colaPacientes = crearCola();
+            pacientesAtendidos = [];
+
+            db.forEach(paciente => {
+                if (paciente.fechaAtencion === null) {
+                    colaPacientes.encolar(paciente);
+                } else {
+                    pacientesAtendidos.push(paciente);
+                }
+            });
+            colaPacientes.reorganizar();
+        };
+        
+        // Event listeners
+        form.addEventListener('submit', registrarPaciente);
+        panelControl.addEventListener('click', (evento) => {
+            const btn = evento.target.closest('button');
+            if (btn) {
+                const idSeccion = btn.id.split('-')[1];
+                mostrarSeccion(idSeccion);
+                actualizarBotonesPanel(btn);
+            }
+        });
+        
+        // Inicializar la vista
+        cargarDatosDesdeDs();
+        actualizarListas();
+    </script>
+</body>
+</html>
